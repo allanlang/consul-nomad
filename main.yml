@@ -1,0 +1,24 @@
+---
+- hosts: all
+  name: global configuration
+  gather_facts: true
+  become: true
+
+  roles:
+    - updates
+
+- hosts: consul
+  name: Install and configure Consul
+  gather_facts: true
+  become: true
+
+  roles:
+    - consul
+
+- hosts: nomad
+  name: Install and configure Nomad
+  gather_facts: true
+  become: true
+
+  roles:
+    - nomad

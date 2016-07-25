@@ -1,0 +1,34 @@
+---
+- name: Install common packages
+  package: name={{ item }}
+  with_items:
+    - unzip
+  
+- name: Fetch and unpack Consul distribution
+  unarchive:
+    dest: /usr/bin
+    copy: no
+    src: "https://releases.hashicorp.com/consul/0.6.4/consul_0.6.4_linux_amd64.zip"
+    mode: 0755
+    creates: /usr/bin/consul
+
+- name: Create Consul directories
+  file: path={{ item }} state=directory mode=0755
+  with_items:
+    - /etc/consul.d
+    - /var/lib/consul
+
+- name: Template agent config
+  template:
+    dest: "/etc/consul.d/agent.json"
+    src: consul.json.tmpl
+  notify: restart consul agent
+
+- name: Template systemd service config
+  template:
+    dest: "/etc/systemd/system/consul.service"
+    src: systemd-consul.tmpl
+  notify: restart consul agent
+
+- name: Start Consul agent service
+  service: name=consul state=started enabled=yes

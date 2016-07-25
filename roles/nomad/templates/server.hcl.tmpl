@@ -1,0 +1,24 @@
+bind_addr = "{{ ansible_host }}"
+region = "{{ data_center }}"
+datacenter = "{{ rack }}"
+
+# Increase log verbosity
+log_level = "DEBUG"
+
+# Setup data dir
+data_dir = "/var/lib/nomad"
+
+# Enable the server
+server {
+    enabled = true
+
+    # Self-elect, should be 3 or 5 for production
+    bootstrap_expect = 1
+
+    retry_join = ["10.12.0.4","10.14.0.4","10.15.0.4"]
+}
+
+client {
+    # NOT recommended to run a node as both client and server in production!
+    enabled = true
+}

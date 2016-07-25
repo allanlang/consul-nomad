@@ -1,0 +1,41 @@
+---
+- name: Install common packages
+  package: name={{ item }}
+  with_items:
+    - unzip
+    - docker
+
+- name: Start Docker service
+  service: name=docker state=started enabled=yes
+
+- name: Fetch and unpack Nomad distribution
+  unarchive:
+    dest: /usr/bin
+    copy: no
+    src: "https://releases.hashicorp.com/nomad/0.4.0/nomad_0.4.0_linux_amd64.zip"
+    mode: 0755
+    creates: /usr/bin/nomad
+
+- name: Create Nomad directories
+  file: path={{ item }} state=directory mode=0755
+  with_items:
+    - /etc/nomad.d
+    - /var/lib/nomad
+
+- name: Template server.hcl
+  template:
+    dest: "/etc/nomad.d/server.hcl"
+    src: server.hcl.tmpl
+
+#- name: Template client.hcl
+#  template:
+#    dest: "/etc/nomad/client.hcl"
+#    src: client.hcl.tmpl
+
+- name: Template nomad systemd service config
+  template:
+    dest: "/etc/systemd/system/nomad.service"
+    src: systemd-nomad.tmpl
+
+- name: Start Nomad agent service
+  service: name=nomad state=started enabled=yes
