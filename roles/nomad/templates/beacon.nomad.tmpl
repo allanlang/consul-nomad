@@ -1,0 +1,46 @@
+job "beacon" {
+	region = "eu-north"
+
+	datacenters = ["eu-north-1a"]
+
+	constraint {
+		attribute = "${attr.kernel.name}"
+		value = "linux"
+	}
+
+	update {
+		stagger = "10s"
+
+		max_parallel = 1
+	}
+
+	group "beacon" {
+
+		count = 5
+
+		restart {
+			attempts = 10
+			interval = "5m"
+			delay = "25s"
+			mode = "delay"
+		}
+
+		task "bleeper" {
+			driver = "docker"
+
+			config {
+				image = "gesbo/docker-bleeper:latest"
+			}
+
+			resources {
+				cpu = 50
+				memory = 48
+			}
+
+			logs {
+				max_files = 10
+				max_file_size = 15
+			}
+		}
+	}
+}

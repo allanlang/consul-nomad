@@ -1,0 +1,123 @@
+job "logs" {
+	region = "eu-north"
+
+	datacenters = ["eu-north-1a"]
+
+	constraint {
+		attribute = "${attr.kernel.name}"
+		value = "linux"
+	}
+
+	update {
+		stagger = "10s"
+		max_parallel = 1
+	}
+
+	group "elk" {
+		count = 1
+
+		restart {
+			attempts = 2
+			interval = "1m"
+			delay = "15s"
+			mode = "delay"
+		}
+
+		task "elasticsearch" {
+			driver = "docker"
+
+			config {
+				image = "elasticsearch:latest"
+				port_map = {
+					http = 9200
+				}
+			}
+
+			service {
+				name = "${TASKGROUP}-elasticsearch"
+				port = "http"
+				check {
+					type = "http"
+					path = "/"
+					interval = "10s"
+					timeout = "2s"
+				}
+			}
+
+			resources {
+				cpu = 500
+				memory = 2048
+				network {
+					mbits = 10
+					port "http" {
+						static = 9200
+					}
+				}
+			}
+		}
+
+		task "kibana" {
+			driver = "docker"
+
+			config {
+				image = "kibana:latest"
+				port_map = {
+					kibanahttp = 5601
+				}
+			}
+
+			env {
+				ELASTICSEARCH_URL = "http://${NOMAD_IP_kibanahttp}:9200"
+			}
+
+			service {
+				name = "${TASKGROUP}-kibana"
+				port = "kibanahttp"
+				check {
+					type = "http"
+					path = "/"
+					interval = "10s"
+					timeout = "2s"
+				}
+			}
+
+			resources {
+				cpu = 250
+				memory = 250
+				network {
+					mbits = 10
+					port "kibanahttp" {
+						static = 5601
+					}
+				}
+			}
+		}
+
+		task "logstash" {
+			driver = "docker"
+
+			config {
+				image = "logstash:latest"
+				command = "logstash"
+				args = [
+					"-e",
+					"input { redis { host => \"nomad-eu-poc.redis.cache.windows.net\" password => \"+i3j2nlMdS8GpPXhzrtB7RU1puT7kt5PRZ62yxtGiSA=\" key => \"filebeat\" data_type => \"list\" } } output { elasticsearch { hosts => [\"${NOMAD_IP_dummy}\"] } }"
+				]
+			}
+
+			service {
+				name = "${TASKGROUP}-logstash"
+			}
+
+			resources {
+				cpu = 200
+				memory = 1024
+				network {
+					mbits = 10
+					port "dummy" {}
+				}
+			}
+		}
+
+	}
+}

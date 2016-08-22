@@ -1,0 +1,10 @@
+filebeat:
+  prospectors:
+    -
+      paths:
+        - "/var/lib/nomad/alloc/*/alloc/logs/*"
+output:
+  redis:
+    host: "{{ redis_host }}"
+    port: {{ redis_port }}
+    password: "{{ redis_password }}"

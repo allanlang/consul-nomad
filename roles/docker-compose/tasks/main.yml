@@ -1,0 +1,6 @@
+---
+- name: Fetch and install docker-compose
+  get_url:
+    dest: /usr/local/bin/docker-compose
+    url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+    mode: 0755

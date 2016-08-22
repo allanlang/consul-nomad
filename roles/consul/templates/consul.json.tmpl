@@ -5,7 +5,7 @@
   "server": true,
   "bind_addr": "{{ ansible_host }}",
   "bootstrap_expect": 3,
-  "retry_join": [{% for node in groups['consul'] %}{% if hostvars[node]['data_center'] == data_center %}{{ '"' }}{{ hostvars[node]['ansible_host'] }}{{ '"' }},{% endif %}{% endfor %}"{{ ansible_host }}"],
+  "retry_join": [{% for node in groups['consul-server'] %}{% if hostvars[node]['data_center'] == data_center %}{{ '"' }}{{ hostvars[node]['ansible_host'] }}{{ '"' }},{% endif %}{% endfor %}"{{ ansible_host }}"],
   "ui": true,
   "client_addr": "0.0.0.0"
 }

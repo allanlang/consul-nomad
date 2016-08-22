@@ -7,6 +7,8 @@
 
 - name: Start Docker service
   service: name=docker state=started enabled=yes
+  
+# NB create group "docker" and add our ops user to this group in order to be able to use docker commands without sudo
 
 - name: Fetch and unpack Nomad distribution
   unarchive:
@@ -27,10 +29,10 @@
     dest: "/etc/nomad.d/server.hcl"
     src: server.hcl.tmpl
 
-#- name: Template client.hcl
-#  template:
-#    dest: "/etc/nomad/client.hcl"
-#    src: client.hcl.tmpl
+- name: Template client.hcl
+  template:
+    dest: "/etc/nomad.d/client.hcl"
+    src: client.hcl.tmpl
 
 - name: Template nomad systemd service config
   template:
@@ -39,3 +41,15 @@
 
 - name: Start Nomad agent service
   service: name=nomad state=started enabled=yes
+  
+# Create some example job template files
+
+- name: Template logs job file
+  template:
+    dest: "/home/alang021/logs.nomad"
+    src: logs.nomad.tmpl
+
+- name: Template beacon job file
+  template:
+    dest: "/home/alang021/beacon.nomad"
+    src: beacon.nomad.tmpl

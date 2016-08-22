@@ -1,0 +1,12 @@
+---
+- name: Fetch and install filebeat
+  yum:
+    name: "https://download.elastic.co/beats/filebeat/filebeat-{{ filebeat_version }}-{{ ansible_architecture }}.rpm"
+
+- name: Template filebeat config for nomad tasks
+  template:
+    dest: "/etc/filebeat/filebeat.yml"
+    src: nomad.yml.tmpl
+
+- name: Start filebeat service
+  service: name=filebeat state=started enabled=yes

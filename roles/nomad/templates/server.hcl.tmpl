@@ -13,12 +13,18 @@ server {
     enabled = true
 
     # Self-elect, should be 3 or 5 for production
-    bootstrap_expect = 1
+	# Below returns the list of servers in the nomad-server group but this really needs to be filtered by data_center too
+    #bootstrap_expect = {{ groups['nomad-server'] | map('extract', hostvars, 'ansible_host') | list | length }}
+	bootstrap_expect = 3
 
-    retry_join = ["10.12.0.4","10.14.0.4","10.15.0.4"]
+    retry_join = [{% for node in groups['nomad-server'] %}{% if hostvars[node]['data_center'] == data_center %}{{ '"' }}{{ hostvars[node]['ansible_host'] }}{{ '"' }},{% endif %}{% endfor %}"{{ ansible_host }}"]
+
 }
 
 client {
     # NOT recommended to run a node as both client and server in production!
     enabled = true
+    options = {
+               "driver.raw_exec.enable" = "1"
+           }
 }

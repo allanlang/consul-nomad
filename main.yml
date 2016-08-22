@@ -7,7 +7,7 @@
   roles:
     - updates
 
-- hosts: consul
+- hosts: consul-server
   name: Install and configure Consul
   gather_facts: true
   become: true
@@ -15,10 +15,12 @@
   roles:
     - consul
 
-- hosts: nomad
+- hosts: nomad-server
   name: Install and configure Nomad
   gather_facts: true
   become: true
 
   roles:
     - nomad
+    - docker-compose
+    - filebeat
