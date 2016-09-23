@@ -6,7 +6,7 @@
 
   roles:
     - updates
-    - { role: Datadog.datadog, datadog_api_key: "6352e3fd7ecac00b721e38575c5bf64a" }
+    - { role: Datadog.datadog, datadog_api_key: "{{ datadog_key }}" }
     - smbshare
 
 #- hosts: windows
@@ -14,7 +14,7 @@
 #  gather_facts: true
   
 #  roles:
-#    - { role: Datadog.datadog, datadog_api_key: "6352e3fd7ecac00b721e38575c5bf64a" }
+#    - { role: Datadog.datadog, datadog_api_key: "{{ datadog_key }}" }
 
 - hosts: consul-server
   name: Install and configure Consul
