@@ -1,0 +1,79 @@
+---
+- name: Configure directories
+  win_file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "C:\\consul\\bin"
+    - "C:\\consul\\data"
+    - "C:\\consul\\conf"
+    - "C:\\nomad\\bin"
+    - "C:\\nomad\\data"
+    - "C:\\nomad\\conf"
+    - "C:\\installs"
+    - "C:\\filebeat\\bin"
+    - "C:\\filebeat\\conf"
+
+- name: Download consul and nomad
+  win_get_url: 
+    url: "{{ item.url }}"
+    dest: "C:\\installs\\{{ item.filename }}"
+  with_items:
+    - { url: "https://releases.hashicorp.com/consul/0.6.4/consul_0.6.4_windows_amd64.zip", filename: "consul.zip" }
+    - { url: "https://releases.hashicorp.com/nomad/0.4.1/nomad_0.4.1_windows_amd64.zip", filename: "nomad.zip" }
+    - { url: "https://download.elastic.co/beats/filebeat/filebeat-1.3.0-windows.zip", filename: "filebeat.zip" }
+
+- name: Install consul and nomad
+  win_unzip:
+    src: "C:\\installs\\{{ item }}.zip"
+    dest: "C:\\{{ item }}\\bin"
+    creates: "C:\\{{ item }}\\bin\\{{ item }}.exe"
+    rm: false
+  with_items:
+    - "consul"
+    - "nomad"
+    - "filebeat"
+
+- name: Template out config files
+  win_template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - { src: "consul.json.tmpl", dest: "C:\\consul\\conf\\consul.json" }
+    - { src: "nomad.conf.tmpl", dest: "C:\\nomad\\conf\\client.conf" }
+    - { src: "filebeat.yml.tmpl", dest: "C:\\filebeat\\conf\\filebeat.yml" }
+
+- name: Install nssm
+  win_chocolatey: name=nssm state=present allow_empty_checksums=true
+
+- name: Create consul service
+  win_nssm:
+    name: Consul
+    application: "C:\\consul\\bin\\consul.exe"
+    app_parameters:
+      _: agent
+      "-config-dir": C:\consul\conf
+    start_mode: auto
+    state: started
+
+- name: Create nomad service
+  win_nssm:
+    name: Nomad
+    application: "C:\\nomad\\bin\\nomad.exe"
+    app_parameters:
+      _: agent
+      "-config": C:\nomad\conf\client.conf
+    start_mode: auto
+    state: started
+
+- name: Create filebeat service
+  win_nssm:
+    name: Filebeat
+    application: "C:\\filebeat\\bin\\filebeat-1.3.0-windows\\filebeat.exe"
+    app_parameters:
+      "-c": C:\filebeat\conf\filebeat.yml
+    start_mode: auto
+    state: started
+
+- name: Copy Bleeper app
+  win_copy:
+    src: Bleeper.exe
+    dest: C:\installs\Bleeper.exe

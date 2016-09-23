@@ -1,0 +1,14 @@
+#jinja2: newline_sequence:'\r\n'
+bind_addr = "{{ ansible_host }}"
+region = "{{ data_center  }}"
+datacenter = "{{ rack }}"
+log_level = "INFO"
+data_dir = "{{ nomad_data_dir }}"
+client {
+    enabled = true
+    options = {
+               "driver.raw_exec.enable" = "1"
+              }
+}
+consul {
+}

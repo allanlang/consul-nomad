@@ -1,5 +1,2 @@
 ---
-cassandra_version: 3.3
-cassandra_user_group: cassandra
-cassandra_cluster_name: demo-cluster
-cassandra_snitch: GossipingPropertyFileSnitch
+#agent_template: consul.json.tmpl

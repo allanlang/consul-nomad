@@ -1,0 +1,12 @@
+---
+- name: Create nginx repo
+  template:
+    dest: "/etc/yum.repos.d/nginx.repo"
+    src: nginx.repo.tmpl
+
+- name: Install nginx
+  yum:
+    name: nginx
+
+- name: Start nginx service
+  service: name=nginx state=started enabled=yes

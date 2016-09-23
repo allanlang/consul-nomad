@@ -1,11 +1,20 @@
 ---
-- hosts: all
+- hosts: all:!windows
   name: global configuration
   gather_facts: true
   become: true
 
   roles:
     - updates
+    - { role: Datadog.datadog, datadog_api_key: "6352e3fd7ecac00b721e38575c5bf64a" }
+    - smbshare
+
+#- hosts: windows
+#  name: datadog
+#  gather_facts: true
+  
+#  roles:
+#    - { role: Datadog.datadog, datadog_api_key: "6352e3fd7ecac00b721e38575c5bf64a" }
 
 - hosts: consul-server
   name: Install and configure Consul
@@ -14,6 +23,23 @@
 
   roles:
     - consul
+
+  vars:
+    agent_template: consul.json.tmpl
+
+- hosts: load-balancer
+  name: Install and configure Consul client
+  gather_facts: true
+  become: true
+
+  roles:
+    - consul
+    - nginx
+    - consul-template
+
+  vars:
+    agent_template: client.json.tmpl
+    consul_data_dir: /var/lib/consul
 
 - hosts: nomad-server
   name: Install and configure Nomad
@@ -24,3 +50,14 @@
     - nomad
     - docker-compose
     - filebeat
+
+#- hosts: windows
+#  name: Configure windows machines
+#  gather_facts: true
+
+#  roles:
+#    - windows
+
+#  vars:
+#    consul_data_dir: C:\\consul\\data
+#    nomad_data_dir: C:\\nomad\\data

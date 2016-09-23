@@ -1,0 +1,8 @@
+#jinja2: newline_sequence:'\r\n'
+{
+  "datacenter": "{{ data_center }}",
+  "data_dir": "{{ consul_data_dir }}",
+  "log_level": "INFO",
+  "retry_join": [{% for node in groups['consul-server'] %}{% if hostvars[node]['data_center'] == data_center %}{{ '"' }}{{ hostvars[node]['ansible_host'] }}{{ '"' }},{% endif %}{% endfor %}"{{ ansible_host }}"],
+  "client_addr": "0.0.0.0"
+}

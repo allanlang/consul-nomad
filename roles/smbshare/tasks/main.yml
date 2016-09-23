@@ -1,0 +1,13 @@
+---
+- name: Create mount directory
+  file:
+    dest: "{{ mount_name }}"
+    state: directory
+
+- name: Mount shared drive
+  mount:
+    name: "{{ mount_name }}"
+    fstype: cifs
+    src: "//{{ storage_account_name }}.file.core.windows.net/{{ file_share_name }}"
+    opts: "vers=3.0,username={{ storage_account_name }},password={{ storage_account_access_key }},dir_mode=0777,file_mode=0777"
+    state: mounted

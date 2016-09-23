@@ -1,0 +1,7 @@
+---
+- name: Fetch and install consul-template
+  unarchive:
+    copy: no
+    src: "https://releases.hashicorp.com/consul-template/{{ consul_template_version }}/consul-template_{{ consul_template_version }}_linux_amd64.zip"
+    dest: "/usr/bin"
+    creates: "/usr/bin/consul-template"

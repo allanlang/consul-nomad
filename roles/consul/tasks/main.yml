@@ -21,7 +21,7 @@
 - name: Template agent config
   template:
     dest: "/etc/consul.d/agent.json"
-    src: consul.json.tmpl
+    src: "{{ agent_template }}" 
   notify: restart consul agent
 
 - name: Template systemd service config
