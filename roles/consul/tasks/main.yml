@@ -60,6 +60,7 @@
     - "C:\\consul\\bin"
     - "C:\\consul\\data"
     - "C:\\consul\\conf"
+    - "C:\\installs"
   when: ansible_os_family == "Windows"
 
 - name: Windows - Download Consul binaries

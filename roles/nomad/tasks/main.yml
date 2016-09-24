@@ -1,4 +1,5 @@
 ---
+# LINUX
 - name: Install common packages
   package: name={{ item }}
   with_items:
@@ -9,7 +10,7 @@
   unarchive:
     dest: /usr/bin
     copy: no
-    src: "https://releases.hashicorp.com/nomad/0.4.0/nomad_0.4.0_linux_amd64.zip"
+    src: "https://releases.hashicorp.com/nomad/{{nomad_version}}/nomad_{{nomad_version}}_linux_amd64.zip"
     mode: 0755
     creates: /usr/bin/nomad
   when: ansible_system == "Linux"
@@ -56,3 +57,48 @@
     dest: "/home/alang021/beacon.nomad"
     src: beacon.nomad.tmpl
   when: ansible_system == "Linux"
+
+# WINDOWS
+- name: Windows - Configure directories
+  win_file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "C:\\nomad\\bin"
+    - "C:\\nomad\\data"
+    - "C:\\nomad\\conf"
+    - "C:\\installs"
+  when: ansible_os_family == "Windows"
+
+- name: Windows - Download Nomad
+  win_get_url: 
+    url: "https://releases.hashicorp.com/nomad/{{nomad_version}}/nomad_{{nomad_version}}_windows_amd64.zip"
+    dest: "C:\\installs\\nomad-{{ nomad_version }}.zip"
+  when: ansible_os_family == "Windows"
+
+- name: Windows - Install consul and nomad
+  win_unzip:
+    src: "C:\\installs\\nomad-{{ nomad_version }}.zip"
+    dest: "C:\\nomad\\bin"
+    creates: "C:\\nomad\\bin\\nomad.exe"
+    rm: false
+  when: ansible_os_family == "Windows"
+
+- name: Windows - Template out config files
+  win_template: src="client-win.conf.tmpl" dest="C:\\nomad\\conf\\client.conf"
+  when: ansible_os_family == "Windows"
+
+- name: Windows - Install nssm
+  win_chocolatey: name=nssm state=present allow_empty_checksums=true
+  when: ansible_os_family == "Windows"
+
+- name: Windows - Create nomad service
+  win_nssm:
+    name: Nomad
+    application: "C:\\nomad\\bin\\nomad.exe"
+    app_parameters:
+      _: agent
+      "-config": C:\nomad\conf\client.conf
+    start_mode: auto
+    state: started
+  when: ansible_os_family == "Windows"
