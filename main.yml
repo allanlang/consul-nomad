@@ -7,7 +7,15 @@
   roles:
     - updates
     - { role: Datadog.datadog, datadog_api_key: "{{ datadog_key }}" }
+
+- hosts: hdfs-node
+  name: Configure HDFS nodes
+  gather_facts: true
+  become: true
+
+  roles:
     - smbshare
+    - hdfsdisk
 
 #- hosts: windows
 #  name: datadog
