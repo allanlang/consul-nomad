@@ -3,12 +3,7 @@
   package: name={{ item }}
   with_items:
     - unzip
-    - docker
-
-- name: Start Docker service
-  service: name=docker state=started enabled=yes
-  
-# NB create group "docker" and add our ops user to this group in order to be able to use docker commands without sudo
+  when: ansible_system == "Linux"
 
 - name: Fetch and unpack Nomad distribution
   unarchive:
@@ -17,30 +12,36 @@
     src: "https://releases.hashicorp.com/nomad/0.4.0/nomad_0.4.0_linux_amd64.zip"
     mode: 0755
     creates: /usr/bin/nomad
+  when: ansible_system == "Linux"
 
 - name: Create Nomad directories
   file: path={{ item }} state=directory mode=0755
   with_items:
     - /etc/nomad.d
     - /var/lib/nomad
+  when: ansible_system == "Linux"
 
 - name: Template server.hcl
   template:
     dest: "/etc/nomad.d/server.hcl"
     src: server.hcl.tmpl
+  when: ansible_system == "Linux"
 
 - name: Template client.hcl
   template:
     dest: "/etc/nomad.d/client.hcl"
     src: client.hcl.tmpl
+  when: ansible_system == "Linux"
 
 - name: Template nomad systemd service config
   template:
     dest: "/etc/systemd/system/nomad.service"
     src: systemd-nomad.tmpl
+  when: ansible_system == "Linux"
 
 - name: Start Nomad agent service
   service: name=nomad state=started enabled=yes
+  when: ansible_system == "Linux"
   
 # Create some example job template files
 
@@ -48,8 +49,10 @@
   template:
     dest: "/home/alang021/logs.nomad"
     src: logs.nomad.tmpl
+  when: ansible_system == "Linux"
 
 - name: Template beacon job file
   template:
     dest: "/home/alang021/beacon.nomad"
     src: beacon.nomad.tmpl
+  when: ansible_system == "Linux"

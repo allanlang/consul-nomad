@@ -1,0 +1,16 @@
+---
+- name: Install common packages
+  package: name={{ item }}
+  with_items:
+    - docker
+
+# NB create group "docker" and add our ops user to this group in order to be able to use docker commands without sudo
+- name: Create docker group
+  group: name=docker
+
+- name: Add user to docker group
+  user: name={{ ansible_user }} group=docker append=yes
+
+- name: Start Docker service
+  service: name=docker state=started enabled=yes
+

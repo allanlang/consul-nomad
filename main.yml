@@ -22,5 +22,6 @@
 
   roles:
     - nomad
+    - docker
     - docker-compose
     - filebeat
