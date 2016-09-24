@@ -1,0 +1,9 @@
+---
+- hosts: hdfs-node
+  name: Configure HDFS nodes
+  gather_facts: true
+  become: true
+
+  roles:
+    - smbshare
+    - hdfsdisk

@@ -1,0 +1,3 @@
+---
+consul_mode: client
+consul_version: 0.6.4

@@ -1,0 +1,8 @@
+---
+- hosts: load-balancer
+  name: Install and configure Nginx client
+  gather_facts: true
+
+  roles:
+    - nginx
+    - consul_template

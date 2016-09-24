@@ -1,2 +1,2 @@
 ---
-#agent_template: consul.json.tmpl
+consul_data_dir: /var/lib/consul
