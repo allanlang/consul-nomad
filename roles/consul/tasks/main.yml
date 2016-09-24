@@ -60,13 +60,13 @@
     - "C:\\consul\\bin"
     - "C:\\consul\\data"
     - "C:\\consul\\conf"
-  when: ansible_system == "Windows"
+  when: ansible_os_family == "Windows"
 
 - name: Windows - Download Consul binaries
   win_get_url: 
     url: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_windows_amd64.zip"
     dest: "C:\\installs\\consul-{{ consul_version }}.zip"
-  when: ansible_system == "Windows"
+  when: ansible_os_family == "Windows"
 
 - name: Windows - Install Consul
   win_unzip:
@@ -74,15 +74,15 @@
     dest: "C:\\consul\\bin"
     creates: "C:\\consul\\bin\\consul.exe"
     rm: false
-  when: ansible_system == "Windows"
+  when: ansible_os_family == "Windows"
   
 - name: Windows - Template out config files
   win_template: src="client-win.json.tmpl" dest="C:\\consul\\conf\\consul.json"
-  when: ansible_system == "Windows"
+  when: ansible_os_family == "Windows"
 
 - name: Windows - Install nssm
   win_chocolatey: name=nssm state=present allow_empty_checksums=true
-  when: ansible_system == "Windows"
+  when: ansible_os_family == "Windows"
 
 - name: Windows - Create consul service
   win_nssm:
@@ -93,4 +93,4 @@
       "-config-dir": C:\consul\conf
     start_mode: auto
     state: started
-  when: ansible_system == "Windows"
+  when: ansible_os_family == "Windows"
