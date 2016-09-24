@@ -25,3 +25,23 @@
     - docker
     - docker-compose
     - filebeat
+
+  vars:
+    - nomad_server: true
+
+- hosts: nomad-client:&windows
+  name: Install and configure Nomad client
+  gather_facts: true
+
+  roles:
+    - nomad
+
+- hosts: nomad-client:&linux
+  name: Install and configure Linux Nomad clients
+  gather_facts: true
+
+  roles:
+    - nomad
+    - docker
+    - filebeat
+
