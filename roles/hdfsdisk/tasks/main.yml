@@ -1,0 +1,69 @@
+---
+- name: Create root home directory
+  file:
+    dest: "/home/root"
+    mode: 0700
+    owner: root
+    group: root
+    state: directory
+
+- name: Create password file
+  template:
+    dest: "/home/root/luks.txt"
+    mode: 0400
+    src: password_file.tmpl
+
+- name: Create encrypted volume
+  crypttab:
+    backing_device: /dev/sdc
+    name: /data1
+    password: "/home/root/luks.txt"
+    state: present
+
+- name: Create partition
+  shell: |
+    [ -b {{ item }} ] && parted --script "{{ item }}" mklabel gpt mkpart primary 1MiB 100%
+  args:
+    creates: '{{ item }}1'
+    executable: '/bin/bash'
+  with_items:
+    - /dev/sdc
+    - /dev/sdd
+    - /dev/sde
+
+- name: LUKS format partition
+  shell: |
+    if [ ! `cryptsetup luksUUID /dev/{{ item.dev }}` ]
+    then
+      cryptsetup --batch-mode -v luksFormat /dev/{{ item.dev }}1 --key-file /home/root/luks.txt
+      cryptsetup open /dev/{{ item.dev }}1 {{ item.mount }} --key-file /home/root/luks.txt
+      touch /home/root/{{item.mount}}.marker
+    fi
+  args:
+    executable: '/bin/bash'
+    creates: "/home/root/{{item.mount}}.marker"
+  with_items:
+    - { dev: 'sdc', mount: 'data1' }
+    - { dev: 'sdd', mount: 'data2' }
+    - { dev: 'sde', mount: 'data3' }
+
+- name: Make filesystem
+  filesystem: fstype=ext4 dev=/dev/mapper/{{ item }}
+  with_items:
+    - data1 
+    - data2
+    - data3
+
+- name: Make mount directory
+  file: path=/{{ item }} state=directory
+  with_items: [ 'data1','data2','data3']
+
+- name: Mount filesystem
+  mount:
+    name: '/{{ item }}'
+    fstype: ext4
+    src: '/dev/mapper/{{ item }}'
+    state: mounted
+  with_items: ['data1','data2','data3']
+
+# TODO - add encrypted volumes to crypttab....
