@@ -26,13 +26,17 @@
   template:
     dest: "/etc/nomad.d/server.hcl"
     src: server.hcl.tmpl
-  when: ansible_system == "Linux"
+  when:
+    - ansible_system == "Linux"
+    - nomad_server
 
 - name: Template client.hcl
   template:
     dest: "/etc/nomad.d/client.hcl"
     src: client.hcl.tmpl
-  when: ansible_system == "Linux"
+  when:
+    - ansible_system == "Linux"
+    - nomad_client
 
 - name: Template nomad systemd service config
   template:
